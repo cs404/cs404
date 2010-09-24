@@ -1,0 +1,49 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd"> 
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="http://github.com/DmitryBaranovskiy/raphael/blob/master/raphael-min.js?raw=true" type="text/javascript" charset="utf-8"></script>
+<script src="http://code.jquery.com/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+
+<style>
+body {
+	background: black;
+}
+</style>
+<script type="text/javascript" charset="utf-8">
+
+var CANVAS_WIDTH = 600;
+var CANVAS_HEIGHT = 400;
+
+function getRgbColor(r, g, b) {
+    var rgb = [r, g, b];
+    return 'rgb(' + rgb.join(',') + ')';
+}
+
+window.onload = function() {
+	var paper = Raphael(10, 10, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+	var tMax = 2 * Math.PI;
+	for (var t=0; t < tMax; t += tMax / 500) {
+		var x = (t / tMax) * CANVAS_WIDTH;
+		var y = Math.cos(t) * (CANVAS_HEIGHT / 2);
+		var circle = paper.circle(x, y, 10);
+    var r = Math.floor(Math.random() * 256);
+    var g = Math.floor(Math.random() * 256 * 0.75);
+    var b = Math.floor(Math.random() * 256);
+    circle.attr('fill', getRgbColor(r, g, b));
+  }
+
+
+	var textAttributes = { font: '18pt Helvetica, Arial, sans', fill: 'cyan' };
+	paper.text(CANVAS_WIDTH / 2, 25, "Hello there, CS404!").attr(textAttributes);
+
+	var rectangleAttributes = { stroke: 'grey' };
+	paper.rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT).attr(rectangleAttributes);
+};
+
+</script>
+</head>
+<body></body>
+</html>
+
