@@ -1,0 +1,58 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="http://github.com/DmitryBaranovskiy/raphael/blob/master/raphael-min.js?raw=true" type="text/javascript" charset="utf-8"></script>
+<script src="http://code.jquery.com/jquery-1.4.2.min.js" type="text/javascript" charset="utf-8"></script>
+
+<style>
+body {
+    color: blue;
+    background: white;
+}
+</style>
+<script type="text/javascript" charset="utf-8">
+
+var CANVAS_WIDTH = 600;
+var CANVAS_HEIGHT = 400;
+
+var handleClick = function(ev) {
+    var textBox = $("#cs404Input").val();
+    var results = "";
+    $("#cs404Results").html(results);
+}
+
+window.onload = function() {
+    var paper = Raphael(10, 10, CANVAS_WIDTH, CANVAS_HEIGHT);
+    
+    var drawPetal = function(x, y, w, h, degrees, rotateX, rotateY) {
+        var el = paper.ellipse(x, y, w, h);
+        el.attr("fill", "#ff0000");
+        el.attr("stroke", "#d00000");
+        el.rotate(degrees, rotateX, rotateY);
+    };
+    
+    var flowerX = 100;
+    var flowerY = 150;
+    var petalRadius = Math.random() * 100;
+    for (var petalDegrees = 0; petalDegrees < 360; petalDegrees += 30) {
+        drawPetal(flowerX + petalRadius, flowerY, petalRadius, petalRadius / 5, petalDegrees, flowerX, flowerY);
+        drawPetal(flowerX, flowerY + petalRadius, petalRadius / 5, petalRadius, petalDegrees, flowerX, flowerY);
+        drawPetal(flowerX - petalRadius, flowerY, petalRadius, petalRadius / 5, petalDegrees, flowerX, flowerY);
+        drawPetal(flowerX, flowerY - petalRadius, petalRadius / 5, petalRadius, petalDegrees, flowerX, flowerY);
+    }
+    var el = paper.ellipse(flowerX, flowerY, 20, 20);
+    el.attr("fill", "yellow");
+    el.attr("stroke", "yellow");
+};
+
+</script>
+</head>
+<body>
+
+  Input: <input id="cs404Input" type="text"> <button onclick="handleClick(); return false">Go</button>
+  <div id="cs404Results" style="color: #00FF00;"></div>
+
+</body>
+</html>
+
