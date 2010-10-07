@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="lib/jquery.js"></script>
+
+<style>
+body {
+	font-family: Verdana,sans-serif;
+    color: white;
+    background: black;
+}
+
+a {
+	text-decoration: none;
+	color: #00FF00;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+textarea#cs404Doc {
+	font-family: Verdana,sans-serif;
+	background: #D0D0D0;
+	width: 40em;
+	height: 12em;
+}
+
+#cs404OutputWrapper {
+	width: 40em;
+	height: 8em;
+	margin-top: 1em;
+	border-style: solid;
+	border-width: 1px;
+	border-color: green;
+}
+
+#cs404Output {
+	padding: 8px;
+}
+
+</style>
+<script type="text/javascript" charset="utf-8">
+
+var getDocumentString = function() {
+	return $("#cs404Doc").val();
+}
+
+var setOutput = function(htmlOutputString) {
+	$("#cs404Output").html(htmlOutputString);
+}
+
+var countWords = function() {
+	var s = getDocumentString();
+	// count the words in s here, and then output the result with the setOutput() function
+}
+
+</script>
+</head>
+<body>
+
+  <h3>Word Counter</h3>
+
+  Document:<br>
+  <textarea id="cs404Doc" cols=80 rows=12></textarea><br>
+  <a href="javascript:countWords()">Count Words</a><br>
+  <div id="cs404OutputWrapper"><div id="cs404Output"></div></div>
+
+</body>
+</html>
