@@ -1,0 +1,41 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="http://www.jstorage.info/static/jquery.js"></script>
+<script src="http://www.jstorage.info/static/jquery-json.js"></script>
+<script src="http://www.jstorage.info/static/jstorage.js"></script>
+
+<style>
+body {
+    color: blue;
+    background: white;
+}
+</style>
+<script type="text/javascript" charset="utf-8">
+
+var KEY_NAME = "Key1";
+
+var saveKey = function() {
+    var val = $("#cs404Value").val();
+    console.log("About to save value '" + val + "' to '" + KEY_NAME + "'.");
+    $.jStorage.set(KEY_NAME, val);
+}
+
+var readKey = function() {
+    console.log("Loading key named '" + KEY_NAME + "'.");
+    var readVal = $.jStorage.get(KEY_NAME);
+    console.log("Read key value as '" + readVal + "'");
+}
+
+</script>
+</head>
+<body>
+
+  Value: <input id="cs404Value" type="text"> <a href="javascript:saveKey()">SAVE</a><br>
+  <a href="javascript:readKey()">REFRESH</a>
+  <div id="cs404Results" style="color: #00FF00;"></div>
+
+</body>
+</html>
+
