@@ -51,9 +51,55 @@ var setOutput = function(htmlOutputString) {
 	$("#cs404Output").html(htmlOutputString);
 }
 
+var isAlphaNum = function(theChar) {
+	 return (
+	 		((theChar >= "A") && (theChar <= "Z")) ||
+	 		((theChar >= "a") && (theChar <= "z")) ||
+	 		((theChar >= "0") && (theChar <= "9"))
+	 	);
+}
+
+var getMostCommonArrayElement = function(ar) {
+// TODO WEEK 6
+	var count = {};
+	
+	for (var i=0; i < ar.length; i++) {
+		var el = ar[i];
+		if (count[el]) {
+			count[el]++;
+		}
+		else {
+			count[el] = 0;
+		}
+	}
+}
+
+// TODO WEEK 6, get all the words in an array
+
+
 var countWords = function() {
 	var s = getDocumentString();
-	// count the words in s here, and then output the result with the setOutput() function
+	
+	var currentLocation = 0;
+	var wordCount = 0;
+	var characterCount = 0;
+	while (currentLocation < s.length) {
+		var currentCharacter = s.substr(currentLocation, 1);
+		
+		if (isAlphaNum(currentCharacter)) {
+			characterCount = characterCount + 1;
+		}
+		else {
+			var nextCharacter = s.substr(currentLocation + 1, 1);
+			if (isAlphaNum(nextCharacter)) {
+				wordCount++;
+			}
+		}
+		currentLocation = currentLocation + 1;
+	}
+	wordCount++;  // need to account for the last word in the string
+	
+	setOutput("Number of words is " + wordCount + ", and the number of characters is " + characterCount + ".");
 }
 
 </script>
