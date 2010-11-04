@@ -1,9 +1,8 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html lang="en">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script src="lib/jquery.js"></script>
-<script src="lib/persist.js"></script>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en"><head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<script src="cs404_week6_db_files/jquery-1.js" type="text/javascript" charset="utf-8"></script>
 
 <style>
 body {
@@ -43,9 +42,9 @@ textarea#cs404Data {
 
 </style>
 <script type="text/javascript" charset="utf-8">
-// debug with the IDE
 
-var DB_KEY = "someData";
+var DB_TABLE = "test";
+var DB_ROW_NUM = 1;
 
 var getDataString = function() {
 	return $("#cs404Data").val();
@@ -55,36 +54,75 @@ var setOutput = function(htmlOutputString) {
 	$("#cs404Output").html(htmlOutputString);
 }
 
-function saveData() {
-	var db = new Persist.Store("cs404", {
-      swf_path: "lib/persist.swf"
-    });
-    var val = getDataString();
-    console.log("Saving " + val.length + " bytes of data to the database.");
-    db.set(DB_KEY, val);
+var getDbUrlPrefix = function() {
+  //return "http://" + window.location.hostname + "/class/db"
+  return "http://cs404.org/class/db" // force other host
 }
 
-function loadData() {
-	var db = new Persist.Store("cs404", {
-      swf_path: "lib/persist.swf"
-    });
-    console.log("Reading '" + DB_KEY + "' key from the database.");
-    db.get(DB_KEY, function (isOkay, val) {
-    	console.log("In database callback, isOkay = " + isOkay + ", val = '" + val + "'");
-    	setOutput(val);
-    });
+function wget(url, method, body, callback) {
+  var remoteTableUrl = "http://cs404.org/class/xdRequest.xml";
+  if (url.match(/'/)) {
+    throw "Embedded single quotes in the YQL remote table URL";
+  }
+  var xdParams = {
+    "method": method,
+    "body": body,
+    "headers": []
+  };
+  var yql = "USE '" + remoteTableUrl + "' AS remote; SELECT * FROM remote WHERE url = '" + url + "' AND parameters = '" + JSON.stringify(xdParams) + "';";
+  var yqlUrl = "http://query.yahooapis.com/v1/public/yql?format=json&debug=true&q=" + encodeURIComponent(yql) + "&callback=?";
+  console.log("Underlying YQL URL:");
+  console.log(yqlUrl);
+  $.getJSON(yqlUrl, callback);
+}
+
+var getDatabaseRow = function(i, callback) {
+  var dbUrl = getDbUrlPrefix() + "/" + DB_TABLE + "/" + i + ".json";
+  console.log("Getting row " + i + " from the database with '" + dbUrl + "'.");
+  wget(dbUrl, "GET", '', function(obj) {
+    console.log("Row " + i + " from the database:");
+    console.log(obj);
+    var respBody = obj.query.results.result.response;
+    respBody = respBody.replace(/(.*);\s*/, "$1");  // YQL seems to add a semicolon?!
+    var respObj = JSON.parse(respBody);
+    callback(JSON.parse(decodeURIComponent(respObj["data"])));
+  });
+}
+
+var setDatabaseRow = function(i, data, callback) {
+  var dbUrl = getDbUrlPrefix() + "/" + DB_TABLE + "/" + i + ".json";
+  console.log("Setting row " + i + " in the database with '" + dbUrl + "'.");
+  var putData = "data=" + encodeURIComponent(JSON.stringify(data));
+  console.log("PUT data is '" + putData + "'.");
+  wget(dbUrl, "PUT", putData, function(obj) {
+    console.log("Row " + i + " set in the database.");
+    console.log(obj);
+    callback(obj.query.results.result);
+  });
+}
+
+var saveData = function() {
+  setDatabaseRow(DB_ROW_NUM, { theString: getDataString() }, function() {
+    setOutput("Wrote to database.");
+  });
+}
+
+var loadData = function() {
+  setOutput("");
+  getDatabaseRow(DB_ROW_NUM, function(obj) {
+    setOutput("Row &rarr; &ldquo;" + obj.theString + "&rdquo;");
+  });
 }
 
 </script>
-</head>
-<body>
+</head><body>
 
   <h3>Database</h3>
 
   Document:<br>
-  <textarea id="cs404Data" cols=80 rows=12></textarea><br>
+  <textarea id="cs404Data" cols="80" rows="12"></textarea><br>
   <a href="javascript:saveData()">Save Data</a> | <a href="javascript:loadData()">Load Data</a><br>
   <div id="cs404OutputWrapper"><div id="cs404Output"></div></div>
 
-</body>
-</html>
+</body></html>
+

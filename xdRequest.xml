@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    This file is part of xdRequest (http://code.google.com/p/xdrequest/).
+
+    xdRequest is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    xdRequest is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with xdRequest.  If not, see <http://www.gnu.org/licenses/>.
+-->
+<table xmlns="http://query.yahooapis.com/v1/schema/table.xsd">
+	<meta>
+		<sampleQuery>SELECT * FROM {table} WHERE url='http://www.google.com' AND  parameters='{"headers": [["Referrer", "http://geeklad.com/"]]}';</sampleQuery>
+	</meta>
+	<bindings>
+		<select itemPath="" produces="XML">
+			<urls>
+				<url/>
+			</urls>
+			<inputs>
+				<key id="url" type="xs:string" paramType="variable" required="true"/>
+				<key id="parameters" type="xs:string" paramType="variable"/>
+      </inputs>
+      <!-- http://developer.yahoo.com/yql/guide/yql-javascript-objects.html -->
+			<execute><![CDATA[
+				var output = { "method" : "GET" };
+				var remoteRequest = y.rest(url);
+				remoteRequest.followRedirects(false);
+				var original_parameters = parameters;
+				if(parameters) {
+					try {
+						eval("parameters="+parameters);
+					}
+					catch(err){
+						output.error = "Invalid JSON parameters, '" + original_parameters + "'.";
+						parameters = false;
+					}
+					if(parameters) {
+						for(var key in parameters) {
+							switch(key) {
+								case "headers":
+									for (var inner_key in parameters.headers) {
+										remoteRequest.header(parameters.headers[inner_key][0], parameters.headers[inner_key][1]);
+									}
+									break;
+
+								case "method":
+									switch(parameters.method) {
+                    case "POST":
+											if(!parameters.body) {
+												output.error = "POST method specified without body.";
+											}
+											else {
+												output.method = "POST";
+											}
+                      break;
+
+                    case "PUT":
+											if(!parameters.body) {
+												output.error = "PUT method specified without body.";
+											}
+											else {
+												output.method = "PUT";
+                      }
+                      break;
+
+										default:
+											output.method = "GET";
+											break;
+									}
+									break;
+							}
+						}
+					}
+				}
+				else {
+					parameters = {"body" : false}
+				}
+				if (output.error) {
+					response.object = {"error": output.error};
+				}
+				else {
+					switch(output.method) {
+						case "POST":
+							output.response = remoteRequest.post(parameters.body);
+              break;
+
+						case "PUT":
+							output.response = remoteRequest.put(parameters.body);
+              break;
+
+						default:
+							output.response = remoteRequest.get();
+							break;
+					}
+          response.object = {
+            "method" : output.method,
+            "url" : url,
+            "request_headers" : remoteRequest.headers,
+            "body" : parameters.body,
+            "status" : output.response.status,
+            "response_headers": output.response.headers,
+            "response" : output.response.response
+          };
+				}
+			]]></execute>
+		</select>
+	</bindings>
+</table>
