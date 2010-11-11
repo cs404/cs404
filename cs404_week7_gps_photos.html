@@ -1,0 +1,100 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="http://github.com/DmitryBaranovskiy/raphael/blob/master/raphael-min.js?raw=true" type="text/javascript" charset="utf-8"></script>
+<script src="http://code.jquery.com/jquery-1.4.3.min.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://github.com/jamespadolsey/jQuery-Plugins/raw/master/cross-domain-ajax/jquery.xdomainajax.js" type="text/javascript" charset="utf-8"></script>
+
+<style>
+body {
+    color: blue;
+    background: white;
+}
+</style>
+<script type="text/javascript" charset="utf-8">
+
+var PANDA_NAMES = ["ling ling", "wang wang", "hsing hsing"];
+
+var getFlickrUrl = function(method, flickrArgs) {
+	var flickrKey = "[Your Key]";
+	return "http://api.flickr.com/services/rest/?method=" + method + "&" + flickrArgs + "&api_key=" + flickrKey + "&format=json&jsoncallback=?";
+}
+
+var getDistance = function(x1, y1, x2, y2) {
+	return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+}
+
+var getInputDistance = function() {
+	return $("#cs404Input").val();
+}
+
+var isNearby = function(hereLoc, fromLoc, dist) {
+	return getDistance(
+		hereLoc.longitude, hereLoc.latitude,
+		fromLoc.longitude, fromLoc.latitude) <= dist;
+}
+
+var getFlickrPhotoUrl = function(photo) {
+	return "http://farm" + photo.farm + ".static.flickr.com/" + photo.server + "/" + photo.id + "_" + photo.secret + "_m.jpg";
+}
+
+var handleClick = function() {
+	$("#cs404Photos").html("");  // clear the div
+	if (navigator.geolocation) {
+		var options = { timeout: 10000 };  // 10sec
+		navigator.geolocation.getCurrentPosition(
+			function(position) {
+				var hereLoc = { latitude: position.coords.latitude, longitude: position.coords.longitude };
+				showPhotos(hereLoc);
+			},
+			function(err) {
+				alert("Error: '" + err + "'");
+			},
+			options);
+   }
+   else {
+      alert("Error: Browser does not support geolocation!");
+   }
+}
+
+var showPhotos = function(hereLoc) {
+	for (var i=0; i < PANDA_NAMES.length; i++) {
+		var pandaName = PANDA_NAMES[i];
+		var flickrUrl = getFlickrUrl("flickr.panda.getPhotos", "panda_name=" + escape(pandaName));
+		console.log("Calling to '" + flickrUrl + "' URL.");
+		$.ajax({
+			url: flickrUrl,
+		    type: "GET",
+			dataType: "json",
+		    success: function(obj) {
+		    	console.log("Result from the API call:");
+		    	console.log(obj);
+   	 	
+		    	for (var j=0; j < obj.photos.photo.length; j++) {
+		    		var photo = obj.photos.photo[j];
+			    	var photoLoc = { latitude: photo.latitude, longitude: photo.longitude };
+		    		if (isNearby(hereLoc, photoLoc, getInputDistance())) {
+		    			console.log("Close photo at '" + getFlickrPhotoUrl(photo) + "'");
+
+						$(document.createElement("img"))
+							.attr({ src: getFlickrPhotoUrl(photo) })
+							.appendTo("#cs404Photos");
+		    		}
+		    	}
+		    }
+	    });
+	}
+}
+
+</script>
+</head>
+<body>
+
+  within Lat/Long: <input id="cs404Input" type="text" value="5"> <button onclick="handleClick(); return false">Go</button>
+  <div id="cs404Results" style="color: #00FF00;"></div>
+  <div id="cs404Photos"></div>
+
+</body>
+</html>
+

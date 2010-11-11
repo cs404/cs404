@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="lib/jquery.js"></script>
+
+<style>
+body {
+	font-family: Verdana,sans-serif;
+    color: white;
+    background: black;
+}
+
+a {
+	text-decoration: none;
+	color: #00FF00;
+}
+
+a:hover {
+	text-decoration: underline;
+}
+
+textarea#cs404Doc {
+	font-family: Verdana,sans-serif;
+	background: #D0D0D0;
+	width: 40em;
+	height: 12em;
+}
+
+#cs404OutputWrapper {
+	width: 40em;
+	height: 8em;
+	margin-top: 1em;
+	border-style: solid;
+	border-width: 1px;
+	border-color: green;
+}
+
+#cs404Output {
+	padding: 8px;
+}
+
+</style>
+<script type="text/javascript" charset="utf-8">
+
+var getDocumentString = function() {
+	return $("#cs404Doc").val();
+}
+
+var setOutput = function(htmlOutputString) {
+	$("#cs404Output").html(htmlOutputString);
+}
+
+var isAlphaNum = function(theChar) {
+	 return (
+	 		((theChar >= "A") && (theChar <= "Z")) ||
+	 		((theChar >= "a") && (theChar <= "z")) ||
+	 		((theChar >= "0") && (theChar <= "9"))
+	 	);
+}
+
+var getMostCommonArrayElement = function(ar) {
+// TODO WEEK 6
+	var count = {};
+	
+	for (var i=0; i < ar.length; i++) {
+		var el = ar[i];
+		if (count[el]) {
+			count[el]++;
+		}
+		else {
+			count[el] = 0;
+		}
+	}
+}
+
+// TODO WEEK 6, get all the words in an array
+
+
+var countWords = function() {
+	var s = getDocumentString();
+	
+	var currentLocation = 0;
+	var wordCount = 0;
+	var characterCount = 0;
+	while (currentLocation < s.length) {
+		var currentCharacter = s.substr(currentLocation, 1);
+		
+		if (isAlphaNum(currentCharacter)) {
+			characterCount = characterCount + 1;
+		}
+		else {
+			var nextCharacter = s.substr(currentLocation + 1, 1);
+			if (isAlphaNum(nextCharacter)) {
+				wordCount++;
+			}
+		}
+		currentLocation = currentLocation + 1;
+	}
+	wordCount++;  // need to account for the last word in the string
+	
+	setOutput("Number of words is " + wordCount + ", and the number of characters is " + characterCount + ".");
+}
+
+</script>
+</head>
+<body>
+
+  <h3>Word Counter</h3>
+
+  Document:<br>
+  <textarea id="cs404Doc" cols=80 rows=12></textarea><br>
+  <a href="javascript:countWords()">Count Words</a><br>
+  <div id="cs404OutputWrapper"><div id="cs404Output"></div></div>
+
+</body>
+</html>
