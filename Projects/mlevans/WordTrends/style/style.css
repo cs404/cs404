@@ -1,0 +1,65 @@
+body {
+	background: #fff;
+	font: 12px/1.231 arial, helvetica, clean, sans-serif;
+	color: #000;
+	margin: 0 0 0 0;
+	padding: 0;
+	text-align: center;
+}
+p {
+	text-align: center;
+}
+a {
+	text-decoration: none;
+	color: #000000;
+}
+a:hover {
+	text-decoration: underline;
+}
+#title {
+	color: #0ff;
+	margin-top: 15px;
+	margin-bottom: 15px;
+	font-size: 270%;
+	margin-top: 200px;
+}
+textarea#cs404Doc {
+	background: #D0D0D0;
+	font: 13px/1.231 arial, helvetica, clean, sans-serif;
+	width: 910px;
+	height: 240px;
+}
+#cs404OutputWrapper {
+	margin-left: auto;
+	margin-right: auto;
+	width: 890px;
+	height: 370px;
+	margin-top: 2em;
+	border-width: 0px;
+	text-align: center;
+	padding: 10px;
+}
+#cs404Output {
+	font: 18px/1.231 arial, helvetica, clean, sans-serif;
+	margin-bottom: 2em;
+	padding: 4px;
+	color: black;
+}
+#chart1 {
+	width: 440px;
+	border-width: 0px;
+	float: right;
+}
+#chart2 {
+	width: 440px;
+	border-width: 0px;
+	float: left;
+}
+#stemmingBox {
+	height: 12px;
+	padding: 0;
+	margin: 3;
+}
+.clear {
+	clear: both;
+}

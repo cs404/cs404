@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Word Trends</title>
+<link rel="stylesheet" href="style/style.css" type="text/css" media="screen" charset="utf-8">
+<script src="typeface-0.14.js" type="text/javascript">//Find typeface.js at http://typeface.neocracy.org/</script>
+<script src="helvetiker_regular.typeface.js" type="text/javascript">//Find the Helvetiker font at http://typeface.neocracy.org/</script>
+<script src="http://code.jquery.com/jquery-1.4.2.min.js"></script>
+<script src="stemmer.js">//Find the Porter Stemmer code at http://tartarus.org/~martin/PorterStemmer/js.txt</script>
+
+<script type="text/javascript" charset="utf-8">
+//Global Variables
+var elem;
+var elem2;
+var previousElem;
+var previousElem2;
+var previous = false;
+//Certain characters in unicode
+var lineBreak = String.fromCharCode(10);
+var apost1 = String.fromCharCode(8217);
+var apost2 = String.fromCharCode(39);
+
+jQuery(document).ready(function() {
+  jQuery("#cs404Doc").val("Place some text in this box and click the Count Words button to analyze the text.\n\nYou can choose to stem the words of the text; this reduces the words to their base form. The application uses the Porter Stemmer algorithm. Just be aware that the algorithm can produce some strange results!");
+});
+
+var getDocumentString = function() {
+	return jQuery("#cs404Doc").val();
+}
+
+var setOutput = function(htmlOutputString) {
+	jQuery("#cs404Output").html(htmlOutputString);
+}
+
+var isAlphaNumPlus = function(charIn){
+	//Also accounting for a special case: apostrophes embedded in words.
+	var pattern = /([a-z]|[0-9]|&|-|\u2019|\u0027)/i;
+	return pattern.test(charIn);
+}
+
+function compareCounts(a,b){
+
+	return b.count - a.count;
+
+}
+
+function resetPage(){
+	jQuery("#cs404Output").html("");
+	jQuery("#cs404Doc").val("");
+	removeChartImage();
+}
+
+function removeChartImage(){
+	if (previousElem){
+		document.getElementById("chart1").removeChild(previousElem);
+		document.getElementById("chart2").removeChild(previousElem2);
+		previous = false;
+	}
+}
+
+function loadChartImage(chartIntensityArray, chartWordArray, total){
+	var i;//Loop Variable
+	var popularWordTotal = 0; //in percentage
+	var mainPieces = "";
+	var otherWordsPiece;
+	var titlesForMainPieces = "";
+	var otherWordsString;
+	var numberOfPieces = 0; //Number of individual pieces in the pie chart
+	
+	var numberOfBars = 0;
+	var barIntensities = "";
+	var barTitles = "";
+	var max = chartIntensityArray[0] + 4;
+	
+	var chart1 = new Image;
+	var chart2 = new Image;
+	
+	//The pie chart
+	if (chartIntensityArray.length <= 3){
+		numberOfPieces = chartIntensityArray.length;
+		otherWordsString = "";
+	} else {
+		numberOfPieces = 3;
+		otherWordsString = "Other Words";
+	}
+
+	for (i = 0; i < numberOfPieces; i++){
+		popularWordTotal = popularWordTotal + parseFloat((100*(chartIntensityArray[i]/total)).toFixed(2));
+		
+		mainPieces = mainPieces + (100*(chartIntensityArray[i]/total)).toFixed(2) + ",";
+		titlesForMainPieces = titlesForMainPieces + chartWordArray[i] + "|";
+	}
+
+	otherWordsPiece = 100 - popularWordTotal;
+	
+	chart1.src = "http://chart.apis.google.com/chart?chxs=0,303030,12.5&chxt=x&chs=440x250&cht=p&chco=1D8DC3&chd=t:" + mainPieces + otherWordsPiece + "|-1&chl=" + 
+	titlesForMainPieces + otherWordsString;
+	
+	//The bar chart
+	
+	if (chartIntensityArray.length < 5){
+		numberOfBars = chartIntensityArray.length;
+	} else {
+		numberOfBars = 5;
+	}
+		
+	for (i = 0; i < numberOfBars - 1; i++){
+		barIntensities = barIntensities + chartIntensityArray[i] + ",";
+			
+		barTitles = barTitles + chartWordArray[i] + ",303030,0," + i + ",11|t";
+	}
+		
+	chart2.src = "http://chart.apis.google.com/chart?chxr=0,0," + max + "&chxt=y&chbh=a&chs=440x250&cht=bvs&chco=1D8DC3&chds=0," + max + "&chd=t:" + barIntensities +
+	chartIntensityArray[numberOfBars - 1] + "&chm=t" + barTitles + chartWordArray[numberOfBars - 1] + ",303030,0,4,11&chtt=Most+Popular+Words";
+	
+	elem = document.createElement("img");
+	elem.setAttribute("src", chart1.src);
+	elem.setAttribute("height", "250");
+	elem.setAttribute("width", "440");
+	elem.setAttribute("alt", "Pie Chart");
+	
+	elem2 = document.createElement("img");
+	elem2.setAttribute("src", chart2.src);
+	elem2.setAttribute("height","250");
+	elem2.setAttribute("width","440");
+	elem2.setAttribute("alt", "Bar Chart");
+	
+	if (previous){
+		removeChartImage();
+		previous = false
+	}
+
+	document.getElementById("chart2").appendChild(elem2);
+	document.getElementById("chart1").appendChild(elem);
+	
+	previousElem = elem;
+	previousElem2 = elem2;
+	previous = true;
+}
+/*
+function checkbox(){
+	//if else
+	//checked = !checked;
+}
+*/
+var countWords = function() {
+		var s = getDocumentString();
+        var i;//Loop variable
+		var j;//Loop variable
+		var exceptedWordCount = 0;
+        var relevantWordCount = 0;
+		var lastCharacter;
+        var currentCharacter;
+		var nextCharacter;
+		var currentWord = "";
+		var generalStringArray = new Array();
+		var exceptionList = ["a","am","an","and","as","at","are","be","but","by","during","for","from","has","have","here","if","in","is","it","no","nor","not","of","or","on","so","that","the","their","they","this","to","was","which","who","-","&"];
+		var push;//Boolean variable; determine whether to add an element to an array
+		
+		for (i=0; i< s.length; i++){
+			lastCharacter = s.substr(i-1,1);
+			currentCharacter = s.substr(i,1);
+            nextCharacter = s.substr(i+1,1);
+				if ((isAlphaNumPlus(currentCharacter))){
+					currentWord = currentWord + currentCharacter;
+
+					if((currentCharacter == "s") && ((lastCharacter == apost1) || (lastCharacter == apost2))){
+						//Special Case dealing with apostrophes
+						currentWord = currentWord.slice(0,currentWord.length-2);
+					}
+					if (!isAlphaNumPlus(nextCharacter)){
+						currentWord = currentWord.toLowerCase();
+						push = true;
+			
+						for (j=0; j < exceptionList.length; j++){
+							if ((currentWord == exceptionList[j]) && (currentWord != "")){
+								exceptedWordCount++;
+							}
+							if (currentWord == exceptionList[j]){
+								push = false;
+								break; //this will limit the the number of times the for loop is executed
+							}
+						}
+						if (push){
+							relevantWordCount++;
+							if(document.getElementById("stemmingBox").checked){
+								generalStringArray.push(stemmer(currentWord));
+							} else {
+								generalStringArray.push(currentWord); //Populating an general array of strings found in the text
+							}
+						}
+						currentWord = "";
+					}
+				}
+			
+		}
+		
+		generalStringArray.sort(); //Alphabetizing the words found in the text
+		
+		var wordCount = relevantWordCount + exceptedWordCount;
+		var popularWord = "";
+		var count = 1;
+		var associativePopularArray = new Array(); //Creating an array of objects.  After sorting, the most popular words and their counts will be found
+												   //at the top of the array.  Each object includes a word and its count.
+		
+		j = 0;
+		for (i=0; i < generalStringArray.length; i++){
+			popularWord = generalStringArray[i];
+			if (popularWord == generalStringArray[i+1]){
+				count++;
+			} else {
+				associativePopularArray[j] = {word: popularWord, count: count};
+				count=1;
+				popularWord = "";
+				j++;
+			}
+		}
+		
+		associativePopularArray.sort(compareCounts); //See the compareCounts method above and the documentation on JavaScript's sort method.
+		var uniqueWordCount = associativePopularArray.length;
+		
+		//Create arrays for the charts.
+		var chartIntensityArray = new Array();
+		var chartWordArray = new Array();
+		var total = 0;
+		
+		for (i=0; i < associativePopularArray.length; i++){
+			chartIntensityArray[i] = associativePopularArray[i].count;
+			chartWordArray[i] = associativePopularArray[i].word;
+			total = total + associativePopularArray[i].count;
+		}
+		
+		//Set the final output.
+		if (wordCount == 0){
+			setOutput("<p>" + "There are no words!" + "</p>");
+			removeChartImage();
+		} else {
+			setOutput("<p>" + "There are " + wordCount + " total words. There are " + uniqueWordCount + " unique and relevant words.</p>");
+			loadChartImage(chartIntensityArray,chartWordArray, total);
+		}
+}
+</script>
+</head>
+<body>
+   <div class="title typeface-js" style="color:#050505; margin-top: 15px; margin-bottom: 15px; font-size:270%; font-family: Helvetiker,Arial,san-serif">
+      Word Trends
+   </div>
+  <textarea id="cs404Doc" cols=80 rows=20></textarea><br>
+  <br><form><input type="button" value="Count Words" onClick="countWords()"/>
+  <input type="reset" value="Reset" onClick="resetPage()"/>
+  <br><br><input type="checkbox" id="stemmingBox" name="stemmingCheck">Include <a href="http://en.wikipedia.org/wiki/Stemming">Stemming</a></form>
+  <div id="cs404OutputWrapper"><div id="cs404Output"></div><div id="chart2"></div><div id="chart1"></div><div class="clear"></div></div>
+  <p style="margin-top:20px; color:#050505; font-size:80%; font-family:Arial,Helvetica,sans-serif">A CS404 Project, 2010.</p>
+</body>
+</html>
